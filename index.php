@@ -3,8 +3,8 @@ require_once('fpdf.php');
 require_once('fpdf_extensions.php');
 require_once('lib/phpqrcode/qrlib.php');
 require_once('utils.php');
-$s->bill_w = 6.14+.2;
-$s->bill_h = 2.61+.1;
+$s->bill_w = 6.14;
+$s->bill_h = 2.61;
 if($_REQUEST['card']){
 	$s->bill_w = 3.5;
 	$s->bill_h = 2;
@@ -13,13 +13,13 @@ $s->draw = 100;//light draw color
 $s->l_w = .008;
 $s->page_width = 8.5;
 $s->page_height = 11;
-$s->margin_top_bottom = 0.1;
+$s->margin_top_bottom = 0.10;
 $s->margin_left_right = 0.5;
 $s->page_usable_width = $s->page_width - ($s->margin_left_right*2);
 $s->page_usable_height = $s->page_height - ($s->margin_top_bottom*2);
 $s->bill_pad = 0.2;
 $s->shadow=.02;
-$s->shadow_c=40;
+$s->shadow_c=80;
 
 //Source (div by 100) http://boardgames.about.com/od/poker/a/chip_denoms.htm 
 $s->colors = array(
@@ -75,18 +75,20 @@ if($_REQUEST['squares']){
 $p_c = $s->page_width/2;
 $off_x = $p_c - $s->bill_w/2;
 $off_y = 99999999;
-$printer = 'PrintCoins.com';
 if(!$_REQUEST['bills']){
 	include('form.html');
 	exit;
  }
 $bills = str_replace('"', '', $_REQUEST['bills']);
+$bills = str_replace('\\', '', $bills);
 $bills = explode("\n", $bills);
 $printer = $_REQUEST['printer'];	
 if(!$printer){
  echo "ERROR no printer set";
  exit;
  }
+$printer = "Printed By: ".$printer;
+$bills = array_slice($bills, 0, 50);//limit number of bills
 foreach($bills as $bill){
 	$off_y +=$s->bill_h;
 	if($off_y>($s->page_height-$s->bill_h)){
@@ -150,8 +152,6 @@ function bill($params){
 	bill_reset($bill);
 
 	if($bill->reverse){
-		//check_balance($bill);
-		//priv_block($bill);
 		leave_your_mark($bill);
 		return;
 	}
@@ -170,14 +170,6 @@ function bill($params){
 				   $bill->y+0.65, 'L');
 	}
 
-	/*	quick_text($bill, 'An easy way to pay someone in bitcoins',
-			   $bill->y+0.6, 'L');
-	*/
-	/*
-	quick_text($bill, 'Bitcoin is not recognized as legal tender',
-			   $bill->y+0.6, 'L');
-	*/
-
 	$pdf->SetFont($bill->font,'I',8);	
 
 	if(!$s->hide_vires){
@@ -186,11 +178,30 @@ function bill($params){
 	}
 
 	$pdf->SetFont($bill->font,'',5);	
-	quick_text($bill, 'Version 2011A             ', $bill->y+$bill->p-.02, 'R');
+	quick_text($bill, 'Version 2012B       ', $bill->y+$bill->p-.02, 'R');
+	bitcoin_cheque_text($bill);
+	checkmark_funded($bill);
 
+
+	if($s->sample){
+		show_sample_mark($bill);
+	}
+
+	$pdf->SetFont($bill->font,'B', 10);
+	$pdf->SetTextColor(73,146,65);
+	quick_text($bill, $s->bottom_message, $bill->y+ $bill->h - $bill->p - .25, 'C');
+	
+	if($_REQUEST['client']=='ronpaul'){
+		ron_paul_details($bill);
+	}
+}
+
+
+/////Helper Functions
+
+function bitcoin_cheque_text($bill){
+	global $s, $pdf;
 	$pdf->SetFont($bill->font,'',8);	
-
-
 	if($bill->amount=='open'){
 		$y = $bill->y+$bill->h-$bill->p - .3;
 		$pdf->SetFont($bill->font,'B',6);
@@ -204,58 +215,37 @@ function bill($params){
 			$txt = 'An easy way to give physical bitcoins';
 		quick_text($bill, $txt, $y+.07, 'L');
 	}
-
-	/*
-	$txt = 'Funded by: ____________________';
-	quick_text($bill, $txt,
-			   $bill->y + $bill->h - $bill->p-.1, 'R');
-	$pdf->SetFont($bill->font,'I',6);	
-	$txt = '(Signature)              ';
-	quick_text($bill, $txt,
-			   $bill->y + $bill->h - $bill->p, 'R');
-	*/
-
-	if($bill->amount == 'open'){
-		$txt = '[_] Checkmark here when bill has been funded.';
-		quick_text($bill, $txt,
-				   $bill->y + $bill->h - $bill->p, 'R');
-	}
-	$pdf->SetFont('Courier','',8);
-	quick_text($bill, $s->crypto, $bill->y+$bill->p, 'C');
-
-	if($s->sample){
-		$pdf->SetFont('Courier','',18);
-		quick_text($bill, 'SAMPLE    SAMPLE  SAMPLE   SAMPLE  SAMPLE', $bill->y+$bill->h*.2, 'C');
-		quick_text($bill, 'SAMPLE    SAMPLE  SAMPLE   SAMPLE  SAMPLE', $bill->y+$bill->h*.5, 'C');
-	}
-
-	$pdf->SetFont($bill->font,'B', 10);
-	$pdf->SetTextColor(73,146,65);
-	quick_text($bill, $s->bottom_message, $bill->y+ $bill->h - $bill->p - .25, 'C');
-	$pdf->SetTextColor(0);
-	if($_REQUEST['client']=='ronpaul'){
-		$pdf->SetFont($bill->font,'I', 7);
-		$a = '"A system of capitalism presumes sound money,';
-		$b = 'not fiat money manipulated by a central bank."';
-		$lh = .12;
-		quick_text($bill, $a, $bill->y+ $bill->h - $bill->p - .25, 'C');
-		quick_text($bill, $b, $bill->y+ $bill->h - $bill->p - .25+$lh, 'C');
-		$pdf->SetFont($bill->font,'', 7);
-		quick_text($bill, 'Ron Paul', $bill->y+ $bill->h - $bill->p - .25+$lh*2, 'C');
-	}
-
-	/*
-	$text = 'Similar to a gift card, this contains a hidden private key. This private key is used to transfer bitcoins out of the public address. Once done, this note is useless. Recipents are encouraged to transfer the coins to their digital wallet before a transaction if they don\'t trust the state of this note. Mark void and discard after extraction.';
-	$pdf->SetFont($font,'',6);
-	$pdf->SetXY($bill->x+$bill->w-2.2, $bill->y+$bill->h-1.1);
-	$pdf->MultiCell(2.1, .08, $text, null, null, '');
-	*/
-
-
 }
 
+function checkmark_funded($bill){
+	global $pdf, $s;
+	$txt = '[_] Checkmark here when bill has been funded.';
+	quick_text($bill, $txt,
+			   $bill->y + $bill->h - $bill->p, 'R');
+	$pdf->SetFont('Courier','',8);
+	quick_text($bill, $s->crypto, $bill->y+$bill->p, 'C');
+}
 
-/////Helper Functions
+function show_sample_mark($bill){
+	global $pdf, $s;
+	$pdf->SetFont('Courier','',18);
+	quick_text($bill, 'SAMPLE    SAMPLE  SAMPLE   SAMPLE  SAMPLE', $bill->y+$bill->h*.2, 'C');
+	quick_text($bill, 'SAMPLE    SAMPLE  SAMPLE   SAMPLE  SAMPLE', $bill->y+$bill->h*.5, 'C');
+}
+
+function ron_paul_details($bill){
+	global $pdf, $s;
+	$pdf->SetTextColor(0);
+	$pdf->SetFont($bill->font,'I', 7);
+	$a = '"A system of capitalism presumes sound money,';
+	$b = 'not fiat money manipulated by a central bank."';
+	$lh = .12;
+	quick_text($bill, $a, $bill->y+ $bill->h - $bill->p - .25, 'C');
+	quick_text($bill, $b, $bill->y+ $bill->h - $bill->p - .25+$lh, 'C');
+	$pdf->SetFont($bill->font,'', 7);
+	quick_text($bill, 'Ron Paul', $bill->y+ $bill->h - $bill->p - .25+$lh*2, 'C');
+}
+
 function bill_init($bill){
 	global $s;
 	if($bill->pub=='test'){
@@ -277,6 +267,10 @@ function bill_init($bill){
 		$bill->amount = number_format($bill->amount, 0, '.', ',');
 	}
 	$bill->color = $s->colors[$bill->amount];
+	foreach($bill->color as $key=>$val){
+		if($val==0)
+			$bill->color[$key] = 1;//for some reason 0s were causing problem for setFillColor
+	}
 	$bill->p = .2;
 	if($bill->card){
 		$p = .15;
@@ -332,21 +326,20 @@ function private_and_public_qr($bill){
 	$priv_y = $y+.3;
 	$line_height = .08;
 	$pdf->SetFont($font,'',5);
-	quick_text($bill, 'Private Key (Hidden QR code)', $priv_y-.05, 'L');
+	quick_text($bill, 'Private Key (Used to transfer coins)', $priv_y-.05, 'L');
 	qr($bill, $bill->priv, $priv_y, 'L', .6, 1.125);
 	$size = .8;
 
 	$y = $bill->y+.65;
 	$nudge = 1.2;
 	$link='http://blockexplorer.com/q/addressbalance/'.$bill->pub;
-	if($bill->amount=='open'){
 		$size = .6;
 		quick_text($bill, 'Check Balance at this QR link', $y-$line_height*2, 'R');
 		quick_text($bill, 'with a smartphone barcode scanner', $y-$line_height, 'R');
 		qr($bill, $link, $y, 'R', .6, .6);
 		$y = $bill->y+1.5;
 		quick_text($bill, "Fund this bill at this public address", $y-$line_height*2, 'R');
-	}
+
 
 	quick_text($bill, $bill->pub, $y-$line_height, 'R');
 	qr($bill, $bill->pub, $y, 'R', $size, $size, 0);
@@ -397,13 +390,12 @@ function qr($bill, $contents, $y, $align, $width, $frame_width, $show_frame=true
 	$pdf->SetXY($x, $y);
 	if($show_frame)
 		$pdf->Cell($frame_width, $frame_width, '', 1);
-	$dir = '/home/robkohr/www/robkohr.com/files/bitcoin/printing/tmp/';
 	$qr_p = ($frame_width - $width)/2;
 	if($contents=='fill'){
 		$pdf->SetFillColor(0);
 		$pdf->Rect($x + $qr_p, $y + $qr_p, $width, $width, 'F');
 	}else{
-		$pdf->QR($contents, $dir, $x + $qr_p, $y + $qr_p, $width, $width);
+		$pdf->QR($contents, '', $x + $qr_p, $y + $qr_p, $width, $width);
 	}
 }
 
@@ -440,7 +432,7 @@ function bill_denominations($bill){
 	//bottom right
 	$pdf->SetFont($font,'B',20);
 	shadow_text($bill,
-				$bill->y + $bill->h - $p -.1,
+				$bill->y + $bill->h - $p -.2,
 				$disp.' BTC',
 				$bill->color, $bill->shadow_c, $bill->shadow,
 				'R');
@@ -497,11 +489,6 @@ function bill_background($bill){
 					   light($bill->color[1]), 
 					   light($bill->color[2])
 					   );
-
-		
-
-	//	$pdf->Cell($bill->w, $bill->h, '', 1);
-	//	$pdf->Cell($bill->w, $bill->h, '', 1);
 	$inset = -.05;
 	$pdf->Rect($bill->x+$inset, $bill->y+$inset, $bill->w-$inset*2, $bill->h-$inset*2, 'F');
 	bill_reset($bill);
@@ -515,7 +502,7 @@ function bill_cuts($bill){
 	$pdf->Line($bill->x, 0, $bill->x, $s->margin_top_bottom/2);
 	$pdf->Line($bill->x+$bill->w, 0, $bill->x+$bill->w, $s->margin_top_bottom/2);
 
-	//bill hor
+	//bill horz
 	if($bill->y < 1){
 		//do first line
 		$pdf->Line(0, $bill->y, $bill->x-.1, $bill->y);
@@ -524,17 +511,11 @@ function bill_cuts($bill){
 	$pdf->Line(0, $bill->y+$bill->h, $bill->x-.1, $bill->y+$bill->h);
 	$pdf->Line($bill->x+ $bill->w + .1, $bill->y+$bill->h, $s->page_width, $bill->y+$bill->h);
 	
-
-
 	//bill vert
 	$y_s = .05;
 	$pdf->Line($bill->x, $bill->y-$y_s, $bill->x, $bill->y+$y_s);
 	$pdf->Line($bill->x+$bill->w, $bill->y-$y_s, $bill->x+$bill->w, $bill->y+$y_s);
 
-	
-
-
-		//	$pdf->Cell($bill->w, $bill->h, '', 1);
 }
 
 
@@ -573,9 +554,6 @@ function bitcoin_image($bill){
 		$w = $s->icon_w;
 		$h = $s->icon_h;
 	}
-		
-
-
 	$x = $bill->x + ($bill->w/2);
 	$y = $bill->y + ($bill->h/2);
 	$image = 
@@ -583,8 +561,6 @@ function bitcoin_image($bill){
 	$pdf->Image($s->icon,$x-$w/2, $y-$h/2, $w, $h);
 
 }
-
-
 
 function set_is_card($bill){
 	$bill->card = false;
@@ -610,7 +586,7 @@ function get_page($url){
 	return $output;
 }
 
-
+//make a lighter version of a color
 function light($num){
 	if(is_array($num)){
 		return array(light($num[0]), light($num[1]), light($num[2]));
@@ -621,6 +597,12 @@ function light($num){
 	}
 }
 
+//for testing
+function pr($var){
+	echo '<pre>';
+	print_r($var);
+	echo '</pre>';
+}
 
 
 ?>

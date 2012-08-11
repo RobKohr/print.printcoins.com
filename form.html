@@ -1,0 +1,77 @@
+<html>
+<style type="text/css">
+.prod{
+float:left;
+width:159px;
+border:1px solid #aaaaaa;
+padding:5px;
+margin:5px;
+height:500px;
+}
+</style>
+<body>
+<h2>Instructions</h2>
+<ol>
+  <li>Go to <a href="https://www.bitaddress.org">https://www.bitaddress.org</a></li>
+  <li>Click on Bulk Wallet</li>
+  <li>Set the number of rows to be the number of bills you would like to print (multiples of 4 are best - limit to 50)</li>
+  <li>Paste the generated bulk wallet into the form below, and hit submit.</li>
+  <li>Print and cut out bills.</li>
+  <li>If you saved the pdf, please delete it and remove from trash</li>
+</ol>
+
+<form method="POST">
+<p>Printer is your name, nickname, or your website url related to bill printing. If you aren't web savy, try using <a href="http://sites.google.com">google sites</a>.
+<br>
+Printer: <input name="printer"></p>
+<p style="display:none">
+Client: <input name="client">
+</p>
+<p>
+Denomination:
+<select name="amount">
+<?foreach($s->colors as $amt=>$color):?>
+<?$selected = ''; if($amt == 'open'){$selected = 'selected';}?>
+  <option <?php echo $selected?> value="<?=$amt?>"><?=$amt?></option>
+<?endforeach;?>
+</select>
+</p>
+<p>
+  Bulk Wallet:<br>
+  <textarea rows="30" cols="100" name="bills"></textarea>
+</p>
+<input type="submit" value="Generate PDF of bills (this will take some time)">
+</form>
+
+<h3>Stuff that I use for printing</h3>
+<p>You don't need to use any of these supplies, and if you are just looking for something quick, you can just print these out on normal 8.5x11 inch paper, with no cover for the private key. You can also just buy the bills from <a href="http://printcoins.com">PrintCoins.com</a> if you would like to get higher quality without all the investment.</p>
+
+<p>Disclosure: I get a kickback from amazon<p>
+    <div class="prod">
+      32 Lb cotton paper, 250 sheets (enough to make 1000 bills)<br>
+      <iframe src="http://rcm.amazon.com/e/cm?lt1=_blank&bc1=FFFFFF&IS2=1&bg1=FFFFFF&fc1=000000&lc1=0000FF&t=printcoins-20&o=1&p=8&l=as1&m=amazon&f=ifr&ref=qf_sp_asin_til&asins=B00006IE2E" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </div>
+    <div class="prod">
+      Important to cut bills in nice straight lines. <br>
+      <iframe src="http://rcm.amazon.com/e/cm?t=printcoins-20&o=1&p=8&l=as1&asins=B00006IATF&ref=qf_sp_asin_til&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=FFFFFF&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </div>
+    <div class="prod">
+      A nice little printer that that works with cheaper ink (if you do this a lot, ink will rapidly outpace the price of the printer)<br>
+      <iframe src="http://rcm.amazon.com/e/cm?t=printcoins-20&o=1&p=8&l=as1&asins=B003UAJBTS&ref=qf_sp_asin_til&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=FFFFFF&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </div>
+    <div class="prod">
+      Yeay ink!<br>
+      <iframe src="http://rcm.amazon.com/e/cm?t=printcoins-20&o=1&p=8&l=as1&asins=B007YWNG94&ref=qf_sp_asin_til&fc1=000000&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=FFFFFF&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+    </div>
+    <div class="prod">
+      You can get <a href="http://www.ebay.com/sch/i.html?_odkw=25+mm+square+hologram&_osacat=0&_trksid=p2045573.m570.l1313&_nkw=25+mm+square+hologram+evident&_sacat=0">25 mm square tamper evident holograms</a> from Ebay. I usualy buy from user sdm-security, who also has a <a href="http://sdmsecurity.com/home.html">website</a> if you want to buy from them directly. <br>
+      You may also wish to contact <a href="https://bitcointalk.org/index.php?action=profile;u=2676">Casascius</a> if you are looking for a <a href="https://bitcointalk.org/index.php?topic=60136.0">higher quality bitcoin specific hologram.</a><br>
+      <br>
+      If you are going to use holograms, print out these <a href="http://www.print.printcoins.com/?squares=1">squares</a> to protect the private key, and be sure to put holograms on both sides of the bills.<br>
+      <img width="50" src="http://sdmsecurity.com/images/svag-security-hologram.jpeg"><br>
+
+    </div>
+      
+
+</body>
+</html>
