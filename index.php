@@ -432,7 +432,7 @@ function bill_denominations($bill){
 	//bottom right
 	$pdf->SetFont($font,'B',20);
 	shadow_text($bill,
-				$bill->y + $bill->h - $p -.2,
+				$bill->y + $bill->h - $p -.18,
 				$disp.' BTC',
 				$bill->color, $bill->shadow_c, $bill->shadow,
 				'R');
