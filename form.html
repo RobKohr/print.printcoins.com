@@ -1,5 +1,6 @@
 <html>
-<style type="text/css">
+<head>
+  <style type="text/css">
 .prod{
 float:left;
 width:159px;
@@ -8,8 +9,27 @@ padding:5px;
 margin:5px;
 height:500px;
 }
-</style>
+
+#links{
+float:right;
+padding:1em;
+margin:1em;
+border: 1px solid #aaaaaa;
+}
+
+a{
+text-decoration:none;
+}
+  </style>
+</head>
 <body>
+<div id="links">
+  <h4>Links</h4>
+  <ul>
+    <li><a href="https://github.com/RobKohr/print.printcoins.com">Source Code</a></li>
+  </ul>
+</div>
+
 <h2>Instructions</h2>
 <ol>
   <li>Go to <a href="https://www.bitaddress.org">https://www.bitaddress.org</a></li>
@@ -39,6 +59,9 @@ Denomination:
 <p>
   Bulk Wallet:<br>
   <textarea rows="30" cols="100" name="bills"></textarea>
+</p>
+<p>
+Recommended payment is 0.01 BTC per bill. You can pay to 1AbL6CLwRiAAe9fvqq6GJ5MjAkF98ac71N. This will be frittered away frivolously to stimulate the bitcoin economy. 
 </p>
 <input type="submit" value="Generate PDF of bills (this will take some time)">
 </form>
