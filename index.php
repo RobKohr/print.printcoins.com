@@ -155,7 +155,8 @@ function bill($params){
 
 	if($s->design){
 		$f = 'design_'.$s->design;
-		return $f($bill);
+		if(function_exists($f))
+			return $f($bill);
 	}
 
 
