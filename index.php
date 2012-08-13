@@ -3,12 +3,20 @@ require_once('fpdf.php');
 require_once('fpdf_extensions.php');
 require_once('lib/phpqrcode/qrlib.php');
 require_once('utils.php');
+$s->design = 'standard';
+
 $s->bill_w = 6.14;
 $s->bill_h = 2.61;
 if($_REQUEST['card']){
 	$s->bill_w = 3.5;
 	$s->bill_h = 2;
  }
+if($_REQUEST['design']){
+	$s->design = $_REQUEST['design'];
+	design_resize_dimensions($s->design.'.png');
+ }
+
+
 $s->draw = 100;//light draw color
 $s->l_w = .008;
 $s->page_width = 8.5;
@@ -83,11 +91,8 @@ $bills = str_replace('"', '', $_REQUEST['bills']);
 $bills = str_replace('\\', '', $bills);
 $bills = explode("\n", $bills);
 $printer = $_REQUEST['printer'];	
-if(!$printer){
- echo "ERROR no printer set";
- exit;
- }
-$printer = "Printed By: ".$printer;
+if($printer)
+	$printer = "Printed By: ".$printer;
 $bills = array_slice($bills, 0, 50);//limit number of bills
 foreach($bills as $bill){
 	$off_y +=$s->bill_h;
@@ -147,6 +152,13 @@ function bill($params){
 								 );
 	$bill->s = $s;
 	$bill->pdf = $pdf;
+
+	if($s->design){
+		$f = 'design_'.$s->design;
+		return $f($bill);
+	}
+
+
 	set_is_card($bill);
 	bill_init($bill);
 	bill_reset($bill);
@@ -196,8 +208,72 @@ function bill($params){
 	}
 }
 
+////Helper Functions
 
-/////Helper Functions
+function design_psy($bill){
+	global $s, $pdf;
+	$img = $s->design . '.png';
+	$bill->w = $s->bill_w;
+	$bill->h = $s->bill_h;
+	
+	$pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
+	$x = .2; $y = .48;
+	qr($bill, $bill->priv, $bill->y+$y, 'L', .9, 1, 0, $x);
+
+	$x = -.143; $y = .97;
+	qr($bill, $bill->pub, $bill->y+$y, 'R', .95, 1.1, 0, $x);
+
+	$pdf->SetTextColor(145, 101, 0);
+	$pdf->SetFont($bill->font,'',5);
+	$x = $bill->x+.9;
+	$y = $bill->y+$bill->h-.3;
+	$line = .1;
+	rot_text("Private Key", $x, $y);
+	rot_text($bill->priv, $x+$line, $y);
+	
+	$y = $y;
+	$x = $bill->x+$bill->w-2;
+	rot_text("Public Address", $x, $y);
+	rot_text($bill->pub, $x+$line, $y);
+
+	$pdf->SetTextColor(0, 0, 0);
+	if($bill->amount!='open'){
+		$pdf->setXY($bill->x+$bill->w - 2.8, $bill->y+$bill->h-.4);
+		$pdf->Write(.5, $bill->amount.' Bitcoins');	
+	}
+
+	$pdf->SetTextColor(145, 101, 0);
+	$pdf->SetFont($bill->font,'',10);
+	$x = .15; $y = 1.38;
+	$pdf->setXY($bill->x+$x, $bill->y+$y);
+	$pdf->Write(.5, 'Spend');
+	$y = $bill->y+$y+.6;
+	$x = $bill->x+$bill->w-.98;
+	$pdf->setXY($x, $y);
+	$pdf->Write(.5, 'Load & Verify');
+}
+
+//x, y is would be where the bottom is for the text
+function rot_text($text, $x, $y){
+	global $pdf;
+	$pdf->setXY($x, $y);
+	$pdf->Rotate(90, $pdf->getX(), $pdf->getY());
+	$pdf->Write(1, $text);	
+	$pdf->Rotate(0, $pdf->getX(), $pdf->getY());
+}
+
+function design_resize_dimensions($img){
+	global $s;
+	if(!$s->image_size){
+		$s->image_size = getimagesize($img);
+	}
+	//to make a bill fit in your wallet, the height should remain the same
+	$w = $s->image_size[0];
+	$h = $s->image_size[1];
+	$ratio = $w/$h;
+	$s->bill_w = $s->bill_h * $w/$h;
+}
+
 
 function bitcoin_cheque_text($bill){
 	global $s, $pdf;
@@ -379,6 +455,10 @@ function quick_text($bill, $text, $y, $align='L', $nudge_x=0){
 
 function qr($bill, $contents, $y, $align, $width, $frame_width, $show_frame=true, $nudge_x=0){
 	global $pdf;
+	if(!$frame_width){
+		$frame_width = $width;
+		$show_frame = 0;
+	}
 	$x = $bill->x + $bill->p;
 	if($align=='R')
 		$x = $bill->x + $bill->w - $bill->p - $frame_width;

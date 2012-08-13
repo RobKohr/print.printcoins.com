@@ -27,6 +27,8 @@ text-decoration:none;
   <h4>Links</h4>
   <ul>
     <li><a href="https://github.com/RobKohr/print.printcoins.com">Source Code</a></li>
+    <li><a href="https://bitcointalk.org/index.php?topic=99921.0">Forum Post</a></li>
+    <li><a href="http://printcoins.com">Order bills</a></li>
   </ul>
 </div>
 
@@ -35,20 +37,27 @@ text-decoration:none;
   <li>Go to <a href="https://www.bitaddress.org">https://www.bitaddress.org</a> in a new tab</li>
   <li>Click on Bulk Wallet</li>
   <li>Set the number of rows to be the number of bills you would like to print (multiples of 4 are best - limit to 50)</li>
-  <li>Paste the generated bulk wallet into the form below, and hit submit.</li>
+  <li>Paste the generated bulk wallet into the form below, fill in mint name, and denomination and hit submit.</li>
   <li>Print and cut out bills.</li>
   <li>If you saved the pdf, please delete it and remove from trash</li>
 </ol>
 
 <form method="POST">
-<p>Printer is your name, nickname, or your website url related to bill printing. If you aren't web savy, try using <a href="http://sites.google.com">google sites</a>.
+<p>Mint name is your name, nickname, or your website url related to bill printing. If you aren't web savy, try using <a href="http://sites.google.com">google sites</a>.
 <br>
-Printer: <input name="printer"></p>
+Mint Name: <input name="printer"></p>
 <p style="display:none">
 Client: <input name="client">
 </p>
 <p>
-Denomination:
+  Design 
+  <select name="design">
+    <option value="">Standard PrintCoins design</option>
+    <option value="psy">Psy design</option>
+  </select>
+</p>
+<p>
+Denomination: (only for standard design)
 <select name="amount">
 <?foreach($s->colors as $amt=>$color):?>
 <?$selected = ''; if($amt == 'open'){$selected = 'selected';}?>
