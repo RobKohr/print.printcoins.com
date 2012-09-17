@@ -210,7 +210,82 @@ function bill($params){
 }
 
 ////Helper Functions
+// Leonardo design by : BitPay Business Solutions <info@bitpay.com>
+// Code modifications by: FLHippy - 1FLH1pPyN5nNxhJUafyd2cUkBwbAaZUNQP
+function design_leo($bill){
+        global $s, $pdf;
+        $img = "leo.png";
+        $bill->w = $s->bill_w;
+        $bill->h = $s->bill_h;
+        $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
+        // Private key QR Code. location is x/y. Size is si
+        $x = .775; $y = .815; $si = .95; 
+        qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x);
+        // Public key QR Code. location is x/y. Size is s
+        $x = -.717; $y = .765; $si = .6; 
+        qr($bill, $bill->priv, $bill->y+$y, 'R', $si, 1.1, 0, $x);
+        // Set text color
+        $pdf->SetTextColor(34, 111, 88);
+        $pdf->SetFont($bill->font,'',14);
+        // Print demoninations.
+        if($bill->amount!='open'){
+                if(strlen($bill->amount) == 4) {
+                        // Left side demonination.
+                        $x = $bill->x -.045;
+                        $y = $bill->y+$bill->h-.85;     
+                        rot_text($bill->amount.' BTC', $x, $y);
+                        // right side demonination.
+                        $y = $bill->y+$bill->h-1.75;
+                        $x = $bill->x + 6.15;
+                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                } else if(strlen($bill->amount) == 3) {
+                        // Left side demonination.
+                        $x = $bill->x -.045;
+                        $y = $bill->y+$bill->h-.85;     
+                        rot_text($bill->amount.' BTC', $x, $y);
+                        // right side demonination.
+                        $y = $bill->y+$bill->h-1.75;
+                        $x = $bill->x + 6.15;
+                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                } else if(strlen($bill->amount) == 2) {
+                        // Left side demonination.
+                        $x = $bill->x -.045;
+                        $y = $bill->y+$bill->h-.95;     
+                        rot_text($bill->amount.' BTC', $x, $y);
+                        // right side demonination.
+                        $y = $bill->y+$bill->h-1.65;
+                        $x = $bill->x + 6.15;
+                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                } else {
+                        // Left side demonination.
+                        $x = $bill->x -.045;
+                        $y = $bill->y+$bill->h-.98;     
+                        rot_text($bill->amount.' BTC', $x, $y);
+                        // right side demonination.
+                        $y = $bill->y+$bill->h-1.63;
+                        $x = $bill->x + 6.15;
+                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                }
+        }
+       // PUBLIC key (twice).
+        $pdf->SetFont($bill->font,'',4.8);
+        $pdf->setXY($bill->x+$bill->w -5.4, $bill->y+$bill->h-2.53);
+        $pdf->Write(.5,"Bitcoin Address");      
+        $pdf->setXY($bill->x+$bill->w -5.4, $bill->y+$bill->h-2.45);
+        $pdf->Write(.5,$bill->pub);
+        // Distributed By Line.
+        $pdf->SetFont($bill->font,'',8);
+        $pdf->setXY($bill->x+$bill->w - 1.9, $bill->y+$bill->h-.6);
+        $pdf->Write(.5,$bill->printer); 
+}
 
+function rot_text_more($text, $x, $y){
+        global $pdf;
+        $pdf->setXY($x, $y);
+        $pdf->Rotate(-90, $pdf->getX(), $pdf->getY());
+        $pdf->Write(1, $text);  
+        $pdf->Rotate(0, $pdf->getX(), $pdf->getY());
+}
 function design_psy($bill){
 	global $s, $pdf;
 	$img = $s->design . '.png';
