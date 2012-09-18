@@ -210,19 +210,27 @@ function bill($params){
 }
 
 ////Helper Functions
+function design_leote($bill){
+	design_leo($bill, 1);
+}
 // Leonardo design by : BitPay Business Solutions <info@bitpay.com>
 // Code modifications by: FLHippy - 1FLH1pPyN5nNxhJUafyd2cUkBwbAaZUNQP
-function design_leo($bill){
+function design_leo($bill, $tamper_evident=0){
         global $s, $pdf;
         $img = "leo.png";
         $bill->w = $s->bill_w;
         $bill->h = $s->bill_h;
         $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
-        // Private key QR Code. location is x/y. Size is si
+        // Public key QR Code. location is x/y. Size is s
         $x = .775; $y = .815; $si = .95; 
         qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x);
-        // Public key QR Code. location is x/y. Size is s
-        $x = -.717; $y = .765; $si = .6; 
+        // Private key QR Code. location is x/y. Size is si
+	// If you're looking to put tamper evident stickers on your bills. you probably want size .6
+	if($tamper_evident) {
+        	$x = -.717; $y = .765; $si = .6; 
+	} else {
+	        $x = -.717; $y = .765; $si = .95; 
+	}
         qr($bill, $bill->priv, $bill->y+$y, 'R', $si, 1.1, 0, $x);
         // Set text color
         $pdf->SetTextColor(34, 111, 88);
@@ -237,7 +245,7 @@ function design_leo($bill){
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.75;
                         $x = $bill->x + 6.15;
-                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                        rot_text($bill->amount . ' BTC', $x, $y, -90);
                 } else if(strlen($bill->amount) == 3) {
                         // Left side demonination.
                         $x = $bill->x -.045;
@@ -246,7 +254,7 @@ function design_leo($bill){
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.75;
                         $x = $bill->x + 6.15;
-                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                        rot_text($bill->amount . ' BTC', $x, $y, -90);
                 } else if(strlen($bill->amount) == 2) {
                         // Left side demonination.
                         $x = $bill->x -.045;
@@ -255,7 +263,7 @@ function design_leo($bill){
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.65;
                         $x = $bill->x + 6.15;
-                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                        rot_text($bill->amount . ' BTC', $x, $y, -90);
                 } else {
                         // Left side demonination.
                         $x = $bill->x -.045;
@@ -264,7 +272,7 @@ function design_leo($bill){
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.63;
                         $x = $bill->x + 6.15;
-                        rot_text_more($bill->amount . ' BTC', $x, $y);
+                        rot_text($bill->amount . ' BTC', $x, $y, -90);
                 }
         }
        // PUBLIC key (twice).
@@ -278,13 +286,50 @@ function design_leo($bill){
         $pdf->setXY($bill->x+$bill->w - 1.9, $bill->y+$bill->h-.6);
         $pdf->Write(.5,$bill->printer); 
 }
-
-function rot_text_more($text, $x, $y){
-        global $pdf;
-        $pdf->setXY($x, $y);
-        $pdf->Rotate(-90, $pdf->getX(), $pdf->getY());
-        $pdf->Write(1, $text);  
-        $pdf->Rotate(0, $pdf->getX(), $pdf->getY());
+// Turing bill image by Aristus Bitcoin Printer <carlos@bueno.org>
+// Aristus Bitcoin Printer - http://carlos.bueno.org/2012/07/paper-bitcoins.html
+// Code modifications by: FLHippy - 1FLH1pPyN5nNxhJUafyd2cUkBwbAaZUNQP
+function design_turing($bill){
+        global $s, $pdf;
+        $img = "turing.png";
+        $bill->w = $s->bill_w;
+        $bill->h = $s->bill_h;
+        $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
+        // Private key QR Code. location is x/y. Size is si
+        $x = 1.2; $y = 3.44; $si = .6;
+        rot_qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x, 45);
+        // Public key QR Code. location is x/y. Size is s
+        $x = 1.3; $y = 6.17; $si = .6;
+        rot_qr($bill, $bill->priv, $bill->y+$y, 'R', $si, 1.1, 0, $x, 45);
+        // Set text color
+        $pdf->SetTextColor(0, 0, 0);
+        // Demonination Line.
+        $pdf->SetFont($bill->font,'',14);
+        $pdf->setXY($bill->x+ 2, $bill->y+$bill->h-.85);
+        if ($bill->amount <= 1) {
+                $disp=" Bitcoin";
+        } else {
+                $disp=" Bitcoins"; 
+        }
+        if($bill->amount!='open'){
+	        shadow_text($bill,$bill->y + .6, $bill->amount . $disp, $bill->color, $bill->shadow_c, $bill->shadow, 'L', +.45);
+	} else {
+	        shadow_text($bill,$bill->y + .6, "____ " . $disp . "s", $bill->color, $bill->shadow_c, $bill->shadow, 'L', +.35);
+	}
+        // PUBLIC key (twice).
+        $pdf->SetFont($bill->font,'',4.8);
+        $pdf->setXY($bill->x+ .4, $bill->y+$bill->h-.85);
+        $pdf->Write(.5,"Bitcoin Address");      
+        $pdf->setXY($bill->x+ .4, $bill->y+$bill->h-.75);
+        $pdf->Write(.5,$bill->pub);     
+        // Slogan line.
+        $pdf->SetFont($bill->font,'B',8);
+        $pdf->setXY($bill->x+$bill->w - 1.54, $bill->y+.36);
+        $pdf->Write(.5,"Vires In Numeris");     
+        // Distributed By Line.
+        $pdf->SetFont($bill->font,'',6);
+        $pdf->setXY($bill->x+$bill->w - 1.85, $bill->y+$bill->h-.75);
+        $pdf->Write(.5,$bill->printer); 
 }
 function design_psy($bill){
 	global $s, $pdf;
@@ -330,14 +375,21 @@ function design_psy($bill){
 }
 
 //x, y is would be where the bottom is for the text
-function rot_text($text, $x, $y){
-	global $pdf;
-	$pdf->setXY($x, $y);
-	$pdf->Rotate(90, $pdf->getX(), $pdf->getY());
-	$pdf->Write(1, $text);	
-	$pdf->Rotate(0, $pdf->getX(), $pdf->getY());
+function rot_text($text, $x, $y, $degrees=90){
+        global $pdf;
+        $pdf->setXY($x, $y);
+        $pdf->Rotate($degrees, $pdf->getX(), $pdf->getY());
+        $pdf->Write(1, $text);  
+        $pdf->Rotate(0, $pdf->getX(), $pdf->getY());
 }
-
+// Rotates the bill around to print a tilted QR code.
+function rot_qr($bill, $contents, $y, $align, $width, $frame_width, $show_frame=true, $nudge_x=0, $degrees=0){
+        global $pdf;
+        $pdf->setXY($x, $y);
+        $pdf->Rotate($degrees, $pdf->getX(), $pdf->getY());
+        qr($bill, $contents, $y, $align, $width, $frame_width, $show_frame, $nudge_x);
+        $pdf->Rotate(0, $pdf->getX(), $pdf->getY());
+}
 function design_resize_dimensions($img){
 	global $s;
 	if(!$s->image_size){
@@ -612,18 +664,17 @@ function bill_denominations($bill){
 
 }
 
-function shadow_text($bill, $y, $text, $color, $shadow_c, $shadow, $align = 'L'){
-	global $pdf;
-	$width = $bill->w - ($bill->p*2);
-	$x = $bill->x + $bill->p;
-	$pdf->SetTextColor($shadow_c);
-	$pdf->SetXY($x+$shadow, $y+$shadow);
-	$pdf->Cell($width, 0, $text, 0, 0, $align);
-	$pdf->SetTextColor($color);
-	$pdf->SetXY($x, $y);
-	$pdf->Cell($width, 0, $text, 0, 0, $align);
+function shadow_text($bill, $y, $text, $color, $shadow_c, $shadow, $align = 'L', $nudge_x=0){
+        global $pdf;
+        $width = $bill->w - ($bill->p*2);
+        $x = ($bill->x + $bill->p) + $nudge_x;
+        $pdf->SetTextColor($shadow_c);
+        $pdf->SetXY($x+$shadow, $y+$shadow);
+        $pdf->Cell($width, 0, $text, 0, 0, $align);
+        $pdf->SetTextColor($color);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($width, 0, $text, 0, 0, $align);
 }
-
 
 function bill_reset($bill){
 	global $s, $pdf;
