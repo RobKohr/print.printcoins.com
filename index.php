@@ -296,10 +296,10 @@ function design_turing($bill){
         $bill->h = $s->bill_h;
         $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
         // Private key QR Code. location is x/y. Size is si
-        $x = 1.2; $y = .83; $si = .6; 
+        $x = 1.2; $y = 3.44; $si = .6;
         rot_qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x, 45);
         // Public key QR Code. location is x/y. Size is s
-        $x = 1.3; $y = .94; $si = .6; 
+        $x = 1.3; $y = 6.17; $si = .6;
         rot_qr($bill, $bill->priv, $bill->y+$y, 'R', $si, 1.1, 0, $x, 45);
         // Set text color
         $pdf->SetTextColor(0, 0, 0);
