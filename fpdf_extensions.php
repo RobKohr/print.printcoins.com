@@ -65,7 +65,7 @@ class PDF extends FPDF
 		$file = $tmp_dir.$file;
 		if(!$str)
 			return;
-		$qr = QRcode::png($str, $file, null, 3, 0);
+		$qr = QRcode::png($str, $file, null, 10, 1);
 		$this->Image($file, $x, $y, $w, $h);
 		unlink($file);
 	}
