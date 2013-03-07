@@ -29,11 +29,11 @@ $s->bill_pad = 0.2;
 $s->shadow=.02;
 $s->shadow_c=80;
 
-//Source (div by 100) http://boardgames.about.com/od/poker/a/chip_denoms.htm 
+//Source (div by 100) http://boardgames.about.com/od/poker/a/chip_denoms.htm
 $s->colors = array(
-				   '0.01'=>array(255, 255, 255), 
-				   //				   '0.02'=>array(255, 255, 0), 
-				   '0.05'=>array(255, 0, 0), 
+				   '0.01'=>array(255, 255, 255),
+				   //				   '0.02'=>array(255, 255, 0),
+				   '0.05'=>array(255, 0, 0),
 				   '0.10'=>array(0, 0, 255),
 				   //				   '0.20'=>array(127, 127, 127),
 				   '0.25'=>array(0, 255, 0),
@@ -90,7 +90,7 @@ if(!$_REQUEST['bills']){
 $bills = str_replace('"', '', $_REQUEST['bills']);
 $bills = str_replace('\\', '', $bills);
 $bills = explode("\n", $bills);
-$printer = $_REQUEST['printer'];	
+$printer = $_REQUEST['printer'];
 if($printer)
 	$printer = "Printed By: ".$printer;
 $bills = array_slice($bills, 0, 50);//limit number of bills
@@ -101,7 +101,7 @@ foreach($bills as $bill){
 		$off_y = $s->margin_top_bottom;
 	}
 	$reverse=$_REQUEST['reverse'];
-	$pdf->SetXY($off_x, $off_y);		
+	$pdf->SetXY($off_x, $off_y);
 	$bill = explode(',', $bill);
 	$pub = $bill[1];
 	$priv = $bill[2];
@@ -113,9 +113,9 @@ foreach($bills as $bill){
 		continue;
 	if(!$priv)
 		continue;
-	bill(array('pub'=>$pub, 'priv'=>$priv, 'printer'=>$printer, 
+	bill(array('pub'=>$pub, 'priv'=>$priv, 'printer'=>$printer,
 			   'amount'=>$_REQUEST['amount'], 'reverse'=>$reverse, 'funded_by', $funded_by));
-	
+
 }
 $pdf->Output();
 
@@ -168,7 +168,7 @@ function bill($params){
 		leave_your_mark($bill);
 		return;
 	}
-	bill_background($bill);	
+	bill_background($bill);
 	bill_cuts($bill);
 	color_borders($bill);
 	bill_denominations($bill);
@@ -176,21 +176,21 @@ function bill($params){
 	bitcoin_image($bill);
 	printer_info($bill);
 	private_and_public_qr($bill);
-	
+
 	if($bill->amount=='open'){
 		$pdf->SetFont($bill->font,'',7);
 		quick_text($bill, ' Funding amount',
 				   $bill->y+0.65, 'L');
 	}
 
-	$pdf->SetFont($bill->font,'I',8);	
+	$pdf->SetFont($bill->font,'I',8);
 
 	if(!$s->hide_vires){
-		quick_text($bill, 'Vires in Numeris', 
+		quick_text($bill, 'Vires in Numeris',
 				   $bill->y + $bill->h - $bill->p, 'C');
 	}
 
-	$pdf->SetFont($bill->font,'',5);	
+	$pdf->SetFont($bill->font,'',5);
 	quick_text($bill, 'Version 2012B       ', $bill->y+$bill->p-.02, 'R');
 	bitcoin_cheque_text($bill);
 	checkmark_funded($bill);
@@ -203,7 +203,7 @@ function bill($params){
 	$pdf->SetFont($bill->font,'B', 10);
 	$pdf->SetTextColor(73,146,65);
 	quick_text($bill, $s->bottom_message, $bill->y+ $bill->h - $bill->p - .25, 'C');
-	
+
 	if($_REQUEST['client']=='ronpaul'){
 		ron_paul_details($bill);
 	}
@@ -222,14 +222,14 @@ function design_leo($bill, $tamper_evident=0){
         $bill->h = $s->bill_h;
         $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
         // Public key QR Code. location is x/y. Size is s
-        $x = .775; $y = .815; $si = .95; 
+        $x = .775; $y = .815; $si = .95;
         qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x);
         // Private key QR Code. location is x/y. Size is si
 	// If you're looking to put tamper evident stickers on your bills. you probably want size .6
 	if($tamper_evident) {
-        	$x = -.717; $y = .765; $si = .6; 
+        	$x = -.717; $y = .765; $si = .6;
 	} else {
-	        $x = -.717; $y = .765; $si = .95; 
+	        $x = -.717; $y = .765; $si = .95;
 	}
         qr($bill, $bill->priv, $bill->y+$y, 'R', $si, 1.1, 0, $x);
         // Set text color
@@ -240,7 +240,7 @@ function design_leo($bill, $tamper_evident=0){
                 if(strlen($bill->amount) == 4) {
                         // Left side demonination.
                         $x = $bill->x -.045;
-                        $y = $bill->y+$bill->h-.85;     
+                        $y = $bill->y+$bill->h-.85;
                         rot_text($bill->amount.' BTC', $x, $y);
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.75;
@@ -249,7 +249,7 @@ function design_leo($bill, $tamper_evident=0){
                 } else if(strlen($bill->amount) == 3) {
                         // Left side demonination.
                         $x = $bill->x -.045;
-                        $y = $bill->y+$bill->h-.85;     
+                        $y = $bill->y+$bill->h-.85;
                         rot_text($bill->amount.' BTC', $x, $y);
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.75;
@@ -258,7 +258,7 @@ function design_leo($bill, $tamper_evident=0){
                 } else if(strlen($bill->amount) == 2) {
                         // Left side demonination.
                         $x = $bill->x -.045;
-                        $y = $bill->y+$bill->h-.95;     
+                        $y = $bill->y+$bill->h-.95;
                         rot_text($bill->amount.' BTC', $x, $y);
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.65;
@@ -267,7 +267,7 @@ function design_leo($bill, $tamper_evident=0){
                 } else {
                         // Left side demonination.
                         $x = $bill->x -.045;
-                        $y = $bill->y+$bill->h-.98;     
+                        $y = $bill->y+$bill->h-.98;
                         rot_text($bill->amount.' BTC', $x, $y);
                         // right side demonination.
                         $y = $bill->y+$bill->h-1.63;
@@ -278,13 +278,13 @@ function design_leo($bill, $tamper_evident=0){
        // PUBLIC key (twice).
         $pdf->SetFont($bill->font,'',4.8);
         $pdf->setXY($bill->x+$bill->w -5.4, $bill->y+$bill->h-2.53);
-        $pdf->Write(.5,"Bitcoin Address");      
+        $pdf->Write(.5,"Bitcoin Address");
         $pdf->setXY($bill->x+$bill->w -5.4, $bill->y+$bill->h-2.45);
         $pdf->Write(.5,$bill->pub);
         // Distributed By Line.
         $pdf->SetFont($bill->font,'',8);
         $pdf->setXY($bill->x+$bill->w - 1.9, $bill->y+$bill->h-.6);
-        $pdf->Write(.5,$bill->printer); 
+        $pdf->Write(.5,$bill->printer);
 }
 // Turing bill image by Aristus Bitcoin Printer <carlos@bueno.org>
 // Aristus Bitcoin Printer - http://carlos.bueno.org/2012/07/paper-bitcoins.html
@@ -309,7 +309,7 @@ function design_turing($bill){
         if ($bill->amount <= 1) {
                 $disp=" Bitcoin";
         } else {
-                $disp=" Bitcoins"; 
+                $disp=" Bitcoins";
         }
         if($bill->amount!='open'){
 	        shadow_text($bill,$bill->y + .6, $bill->amount . $disp, $bill->color, $bill->shadow_c, $bill->shadow, 'L', +.45);
@@ -319,17 +319,17 @@ function design_turing($bill){
         // PUBLIC key (twice).
         $pdf->SetFont($bill->font,'',4.8);
         $pdf->setXY($bill->x+ .4, $bill->y+$bill->h-.85);
-        $pdf->Write(.5,"Bitcoin Address");      
+        $pdf->Write(.5,"Bitcoin Address");
         $pdf->setXY($bill->x+ .4, $bill->y+$bill->h-.75);
-        $pdf->Write(.5,$bill->pub);     
+        $pdf->Write(.5,$bill->pub);
         // Slogan line.
         $pdf->SetFont($bill->font,'B',8);
         $pdf->setXY($bill->x+$bill->w - 1.54, $bill->y+.36);
-        $pdf->Write(.5,"Vires In Numeris");     
+        $pdf->Write(.5,"Vires In Numeris");
         // Distributed By Line.
         $pdf->SetFont($bill->font,'',6);
         $pdf->setXY($bill->x+$bill->w - 1.85, $bill->y+$bill->h-.75);
-        $pdf->Write(.5,$bill->printer); 
+        $pdf->Write(.5,$bill->printer);
 }
 
 function design_psyte($bill){
@@ -340,7 +340,7 @@ function design_psy($bill, $tamper_evident){
 	$img = $s->design . '.png';
 	$bill->w = $s->bill_w;
 	$bill->h = $s->bill_h;
-	
+
 	$pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
 	$x = .2; $y = .48;
 	if($tamper_evident) {
@@ -415,13 +415,13 @@ function design_resize_dimensions($img){
 
 function bitcoin_cheque_text($bill){
 	global $s, $pdf;
-	$pdf->SetFont($bill->font,'',8);	
+	$pdf->SetFont($bill->font,'',8);
 	if($bill->amount=='open'){
 		$y = $bill->y+$bill->h-$bill->p - .3;
 		$pdf->SetFont($bill->font,'B',6);
-		$pdf->SetTextColor(0);		
+		$pdf->SetTextColor(0);
 		quick_text($bill, 'Bitcoin Cheque', $y, 'L');
-		
+
 		$pdf->SetFont($bill->font,'B',6);
 		$pdf->SetTextColor(0);
 		$txt = 'An easy way to give someone bitcoins';
@@ -503,7 +503,7 @@ function leave_your_mark($bill){
 			$x = $left + $i*$size + $bill->x;
 			$y = $top + $j*$size + $bill->y;
 			$pdf->setXY($x, $y);
-			$pdf->Rect($x, $y, $size, $size, 'D');			
+			$pdf->Rect($x, $y, $size, $size, 'D');
 		}
 	}
 	$pdf->SetFont($bill->font,'',7);
@@ -513,7 +513,7 @@ function leave_your_mark($bill){
 	quick_text($bill, 'www.flickr.com/groups/bitcoin/', $top+($size*2)+.18, 'C');
 	$link = 'http://www.flickr.com/groups/bitcoin/';
 	//	qr($bill, $link, $top+($size*2)+.16, 'C', .4, .4, false, -$size*1.6);
-	
+
 }
 
 
@@ -576,7 +576,7 @@ function printer_info($bill){
 	$p = $bill->p;
 	$y = $bill->y + $bill->h - $p -.03;
 	$pdf->SetFont($bill->font,'B',6);
-	$pdf->SetTextColor(0);		
+	$pdf->SetTextColor(0);
 	if(!$s->hide_printcoins)
 		quick_text($bill, "".$bill->printer, $y, 'L');
 	$pdf->SetFont($bill->font,'',4);
@@ -654,7 +654,7 @@ function bill_denominations($bill){
 				$disp.' BTC',
 				$bill->color, $bill->shadow_c, $bill->shadow,
 				'R');
-	
+
 	//top right
 	$pdf->SetFont($font,'B',16);
 	shadow_text($bill,
@@ -695,15 +695,15 @@ function bill_reset($bill){
 
 function draw_frame($bill){
 	bill_reset($bill);
-	
+
 }
 
 function bill_background($bill){
 	global $pdf;
 	bill_reset($bill);
 	$pdf->SetFillColor(
-					   light($bill->color[0]), 
-					   light($bill->color[1]), 
+					   light($bill->color[0]),
+					   light($bill->color[1]),
 					   light($bill->color[2])
 					   );
 	$inset = -.05;
@@ -727,7 +727,7 @@ function bill_cuts($bill){
 	}
 	$pdf->Line(0, $bill->y+$bill->h, $bill->x-.1, $bill->y+$bill->h);
 	$pdf->Line($bill->x+ $bill->w + .1, $bill->y+$bill->h, $s->page_width, $bill->y+$bill->h);
-	
+
 	//bill vert
 	$y_s = .05;
 	$pdf->Line($bill->x, $bill->y-$y_s, $bill->x, $bill->y+$y_s);
@@ -737,7 +737,7 @@ function bill_cuts($bill){
 
 
 function bill_center_text_amount($bill){
-		$txt = denomination_to_words($bill->amount);		
+		$txt = denomination_to_words($bill->amount);
 		$pdf->SetXY($bill->x+$s->shadow, $bill->y+$bill->h/2+$s->shadow);
 		$pdf->SetTextColor($s->shadow_c, $s->shadow_c, $s->shadow_c);
 		$pdf->Cell($bill->w, 0, $txt ,0, 0, 'C');
@@ -773,7 +773,7 @@ function bitcoin_image($bill){
 	}
 	$x = $bill->x + ($bill->w/2);
 	$y = $bill->y + ($bill->h/2);
-	$image = 
+	$image =
 	$pdf->SetFillColor($color[0], $color[1], $color[2]);
 	$pdf->Image($s->icon,$x-$w/2, $y-$h/2, $w, $h);
 
@@ -795,10 +795,10 @@ function denomination_to_words($amt){
 
 
 function get_page($url){
-	$ch = curl_init(); 
-	curl_setopt($ch, CURLOPT_URL, $url); 
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-	$output = curl_exec($ch); 
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$output = curl_exec($ch);
 	curl_close($ch);
 	return $output;
 }
