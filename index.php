@@ -331,7 +331,11 @@ function design_turing($bill){
         $pdf->setXY($bill->x+$bill->w - 1.85, $bill->y+$bill->h-.75);
         $pdf->Write(.5,$bill->printer); 
 }
-function design_psy($bill){
+
+function design_psyte($bill){
+        design_psy($bill, 1);
+}
+function design_psy($bill, $tamper_evident){
 	global $s, $pdf;
 	$img = $s->design . '.png';
 	$bill->w = $s->bill_w;
@@ -339,7 +343,11 @@ function design_psy($bill){
 	
 	$pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
 	$x = .2; $y = .48;
-	qr($bill, $bill->priv, $bill->y+$y, 'L', .9, 1, 0, $x);
+	if($tamper_evident) {
+		qr($bill, $bill->priv, $bill->y+$y, 'L', .6, 1, 0, $x);
+	} else {
+		qr($bill, $bill->priv, $bill->y+$y, 'L', .9, 1, 0, $x);
+	}
 
 	$x = -.143; $y = .97;
 	qr($bill, $bill->pub, $bill->y+$y, 'R', .95, 1.1, 0, $x);
@@ -349,9 +357,11 @@ function design_psy($bill){
 	$x = $bill->x+.9;
 	$y = $bill->y+$bill->h-.3;
 	$line = .1;
-	rot_text("Private Key", $x, $y);
-	rot_text($bill->priv, $x+$line, $y);
-	
+	if(!$tamper_evident) {
+		rot_text("Private Key", $x, $y);
+		rot_text($bill->priv, $x+$line, $y);
+	}
+
 	$y = $y;
 	$x = $bill->x+$bill->w-2;
 	rot_text("Public Address", $x, $y);
@@ -360,7 +370,7 @@ function design_psy($bill){
 	$pdf->SetTextColor(0, 0, 0);
 	if($bill->amount!='open'){
 		$pdf->setXY($bill->x+$bill->w - 2.8, $bill->y+$bill->h-.4);
-		$pdf->Write(.5, $bill->amount.' Bitcoins');	
+		$pdf->Write(.5, $bill->amount.' Bitcoins');
 	}
 
 	$pdf->SetTextColor(145, 101, 0);
@@ -379,7 +389,7 @@ function rot_text($text, $x, $y, $degrees=90){
         global $pdf;
         $pdf->setXY($x, $y);
         $pdf->Rotate($degrees, $pdf->getX(), $pdf->getY());
-        $pdf->Write(1, $text);  
+        $pdf->Write(1, $text);
         $pdf->Rotate(0, $pdf->getX(), $pdf->getY());
 }
 // Rotates the bill around to print a tilted QR code.
