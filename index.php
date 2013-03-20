@@ -7,6 +7,10 @@ $s->design = 'standard';
 
 $s->bill_w = 6.14;
 $s->bill_h = 2.61;
+if($_REQUEST['design']=='psy_business_card'){
+	$_REQUEST['card'] = true;
+	$margin_layout = 'avery 8371';
+ }
 if($_REQUEST['card']){
 	$s->bill_w = 3.5;
 	$s->bill_h = 2;
@@ -21,13 +25,24 @@ $s->draw = 100;//light draw color
 $s->l_w = .008;
 $s->page_width = 8.5;
 $s->page_height = 11;
-$s->margin_top_bottom = 0.10;
-$s->margin_left_right = 0.5;
-$s->page_usable_width = $s->page_width - ($s->margin_left_right*2);
-$s->page_usable_height = $s->page_height - ($s->margin_top_bottom*2);
+$s->margin_top = .1;
+$s->margin_bottom = .1;
+$s->margin_left = .5;
+$s->margin_right = .5;
+$s->page_usable_width = $s->page_width - ($s->margin_left + $s->margin_right);
+$s->page_usable_height = $s->page_height - ($s->margin_bottom + $s->margin_bottom);
 $s->bill_pad = 0.2;
 $s->shadow=.02;
 $s->shadow_c=80;
+
+if(isset($margin_layout)){
+	if($margin_layout == 'avery 8371'){
+		$s->margin_top = .5;
+		$s->margin_bottom = .42;
+		$s->margin_left = .84;
+		$s->margin_right = .31;
+	}
+ }
 
 //Source (div by 100) http://boardgames.about.com/od/poker/a/chip_denoms.htm 
 $s->colors = array(
@@ -73,7 +88,7 @@ if($_REQUEST['client']=='ronpaul'){
 
 $pdf = new PDF('P','in','Letter');
 
-$pdf->SetMargins($s->margin_top_bottom, $s->margin_left_right);
+$pdf->SetMargins($s->margin_top, $s->margin_left, $s->margin_right);
 $pdf->SetAutoPageBreak(false);
 if($_REQUEST['squares']){
 	squares();
@@ -98,7 +113,7 @@ foreach($bills as $bill){
 	$off_y +=$s->bill_h;
 	if($off_y>($s->page_height-$s->bill_h)){
 		$pdf->AddPage();
-		$off_y = $s->margin_top_bottom;
+		$off_y = $s->margin_top;
 	}
 	$reverse=$_REQUEST['reverse'];
 	$pdf->SetXY($off_x, $off_y);		
@@ -108,13 +123,13 @@ foreach($bills as $bill){
 	if($bill[3])
 		$amount = trim($bill[3]);
 	if(!$amount)
-		$amount = 'open';
+		$amount = $_REQUEST['amount'];
 	if(!$pub)
 		continue;
 	if(!$priv)
 		continue;
 	bill(array('pub'=>$pub, 'priv'=>$priv, 'printer'=>$printer, 
-			   'amount'=>$_REQUEST['amount'], 'reverse'=>$reverse, 'funded_by', $funded_by));
+			   'amount'=>$amount, 'reverse'=>$reverse, 'funded_by', $funded_by));
 	
 }
 $pdf->Output();
@@ -283,7 +298,7 @@ function design_leo($bill, $tamper_evident=0){
         $pdf->Write(.5,$bill->pub);
         // Distributed By Line.
         $pdf->SetFont($bill->font,'',8);
-        $pdf->setXY($bill->x+$bill->w - 1.9, $bill->y+$bill->h-.6);
+        $pdf->setXY($bill->x+$bill->w - 2, $bill->y+$bill->h-.6);
         $pdf->Write(.5,$bill->printer); 
 }
 // Turing bill image by Aristus Bitcoin Printer <carlos@bueno.org>
@@ -295,6 +310,7 @@ function design_turing($bill){
         $bill->w = $s->bill_w;
         $bill->h = $s->bill_h;
         $pdf->Image($img, $bill->x, $bill->y, $bill->w, $bill->h, 'png');
+		$pdf->Rect($bill->x, $bill->y, $bill->w, $bill->h, 'D');
         // Private key QR Code. location is x/y. Size is si
         $x = 1.2; $y = 3.44; $si = .6;
         rot_qr($bill, $bill->pub, $bill->y+$y, 'L', $si, 1, 0, $x, 45);
@@ -706,8 +722,8 @@ function bill_cuts($bill){
 	bill_reset($bill);
 	$pdf->SetDrawColor($s->draw);
 	//top bottom of sheet
-	$pdf->Line($bill->x, 0, $bill->x, $s->margin_top_bottom/2);
-	$pdf->Line($bill->x+$bill->w, 0, $bill->x+$bill->w, $s->margin_top_bottom/2);
+	$pdf->Line($bill->x, 0, $bill->x, $s->margin_top/2);
+	$pdf->Line($bill->x+$bill->w, 0, $bill->x+$bill->w, $s->margin_bottom/2);
 
 	//bill horz
 	if($bill->y < 1){
